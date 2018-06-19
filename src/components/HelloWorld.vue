@@ -100,7 +100,7 @@
           <el-main>
             <div class="grid-content bg-purple">
               <el-tree
-                :data="organization"
+                :data="treeList"
                 node-key="id"
                 default-expand-all
                 @node-click="nodeClick"
@@ -250,40 +250,7 @@
         fatherNodeName: '',
         childNodeType: '',
         childNodeName: '',
-        organization: [{
-          id: 1,
-          name: '面对面',
-          type: "总平台",
-          children: [{
-            id: 4,
-            name: '舒客',
-            type: "子平台",
-            children: [{
-              id: 9,
-              name: '金合',
-              type: "企业"
-            }, {
-              id: 10,
-              name: '开发部',
-              type: "部门"
-            }, {
-              id: 11,
-              name: '散客',
-              type: "散客"
-            }]
-          },{ id: 2,
-            name: '测试',
-            type: "企业",
-            children:[{
-              id: 5,
-              name: '人事',
-              type: "部门"
-            }]
-          },{id: 3,
-            name: '散客',
-            type: "散客"
-          }]
-        }],
+        treeList:[] ,
         addItem: '',
         optionsTP: [{
           value: '子平台',
@@ -321,6 +288,46 @@
           })
           .catch(_ => {});
       },
+
+      //模拟从接口获取数据
+      getTreeList() {
+        this.treeList = [{
+          id: 1,
+          name: '面对面',
+          type: "总平台",
+          children: [{
+            id: 4,
+            name: '舒客',
+            type: "子平台",
+            children: [{
+              id: 9,
+              name: '金合',
+              type: "企业"
+            }, {
+              id: 10,
+              name: '开发部',
+              type: "部门"
+            }, {
+              id: 11,
+              name: '散客',
+              type: "散客"
+            }]
+          },{ id: 2,
+            name: '测试',
+            type: "企业",
+            children:[{
+              id: 5,
+              name: '人事',
+              type: "部门"
+            }]
+          },{id: 3,
+            name: '散客',
+            type: "散客"
+          }]
+        }]
+      }
+
+
 
       // setItem() {
       //   let newChild = { id: id++, label: this.addItem, children: [] };
@@ -379,6 +386,9 @@
       //   const index = children.findIndex(d => d.id === data.id);
       //   children.splice(index, 1);
       // },
+    },
+    created() {
+      this.getTreeList()
     }
   }
 </script>
