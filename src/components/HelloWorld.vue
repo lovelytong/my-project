@@ -6,33 +6,70 @@
       :visible.sync="dialogVisible"
       width="30%"
       :before-close="handleClose">
-      <el-input v-model="addItem" placeholder="请输入内容"></el-input>
+      <el-select v-model="fatherNode" placeholder="父节点">
+        <el-option
+          v-for="item in options"
+          :key="item.value"
+          :label="item.value"
+          :value="item.label">
+        </el-option>
+      </el-select>
+      <el-select v-model="addItem" placeholder="子节点">
+        <el-option
+          v-for="item in options"
+          :key="item.value"
+          :label="item.value"
+          :value="item.label">
+        </el-option>
+      </el-select>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        <el-button type="primary" @click="setItem">确 定</el-button>
       </span>
     </el-dialog>
 
     <el-row>
-      <el-col :span="3">
+      <el-col :span="5">
         <el-container>
           <el-header style="border-right: 1px solid whitesmoke">
             <el-row>
               <el-button type="info" plain size="mini" @click="dialogVisible = true">新增</el-button>
-              <el-button type="warning" plain size="mini">修改</el-button>
-              <el-button type="danger" plain size="mini">删除</el-button>
+              <el-button  v-if="fatherNode" type="warning" plain size="mini" @click="dialogVisible = true">修改</el-button>
+              <el-button  v-if="fatherNode" type="danger" plain size="mini" @click="dialogVisible = true">删除</el-button>
             </el-row>
           </el-header>
           <el-main>
             <div class="grid-content bg-purple">
-              <el-tree :data="organization" :props="defaultProps" @node-click="handleNodeClick"
-                       :default-expanded-keys="[1,2,3]" show-checkbox node-key="id"></el-tree>
+              <el-tree
+                :data="organization"
+                node-key="id"
+                default-expand-all
+                @node-click="nodeClick"
+                :expand-on-click-node="false">
+                <span class="custom-tree-node" slot-scope="{ node, data }">
+                  <span>{{ data.name }} （{{ data.type }} ）</span>
+                  <!--<span v-if="node.id === showId">-->
+                    <!--<el-button-->
+                      <!--type="text"-->
+                      <!--size="mini"-->
+                      <!--@click="() => append(data)">-->
+                      <!--Append-->
+                    <!--</el-button>-->
+                    <!--<el-button-->
+                      <!--type="text"-->
+                      <!--size="mini"-->
+                      <!--@click="() => remove(node, data)">-->
+                      <!--Delete-->
+                    <!--</el-button>-->
+                  <!--</span>-->
+              </span>
+              </el-tree>
             </div>
           </el-main>
         </el-container>
 
       </el-col>
-      <el-col :span="21">
+      <el-col :span="19">
         <el-container>
           <el-header>
             <el-row :gutter="12">
@@ -90,10 +127,8 @@
             <el-row>
               <el-col :span="24">
                 <el-table
-                  :data="tableData"
                   style="width: 100%">
                   <el-table-column
-                    fixed
                     prop="date"
                     label="日期"
                     width="200">
@@ -127,7 +162,7 @@
                     label="操作"
                     width="100">
                     <template slot-scope="scope">
-                      <el-button @click="handleClick(scope.row)" type="text" size="small">删除</el-button>
+                      <el-button type="text" size="small">删除</el-button>
                       <el-button type="text" size="small">编辑</el-button>
                     </template>
                   </el-table-column>
@@ -144,82 +179,72 @@
 </template>
 
 <script>
+  let id = 1000;
   export default {
     name: 'HelloWorld',
-    data: function () {
+    data() {
       return {
-        addItem:"test",
         dialogVisible: false,
+        thisLabel: null,
+        showId: '',
+        fatherNode: '',
+        childNode: '',
         organization: [{
           id: 1,
-          label: '总平台',
+          name: '面对面',
+          type: "总平台",
           children: [{
-            id: 2,
-            label: '子平台1',
-            children: [{
-              label: '企业'
-            }, {
-              label: '散客'
-            }]
-          }, {
-            id: 3,
-            label: '子平台2',
-            children: [{
-              label: '企业',
-              children: [{
-                label: '部门一'
-              }]
-            }]
-          }, {
             id: 4,
-            label: '企业',
+            name: '舒客',
+            type: "子平台",
             children: [{
-              label: '部门一'
+              id: 9,
+              name: '金合',
+              type: "企业"
+            }, {
+              id: 10,
+              name: '开发部',
+              type: "部门"
+            }, {
+              id: 11,
+              name: '散客',
+              type: "散客"
             }]
-
-          }, {
-            id: 5,
-            label: '散客'
+          },{ id: 2,
+            name: '测试',
+            type: "企业",
+            children:[{
+              id: 5,
+              name: '人事',
+              type: "部门"
+            }]
+          },{id: 3,
+            name: '散客',
+            type: "散客"
           }]
         }],
-        defaultProps: {
-          children: 'children',
-          label: 'label'
-        },
-        tableData: [{
-          date: '2016-05-03',
-          name: '王小虎',
-          province: '上海',
-          city: '普陀区',
-          address: '上海市普陀区金沙江路 1518 弄',
-          zip: 200333
+        addItem: '',
+        options: [{
+          value: '子平台',
+          label: '子平台'
         }, {
-          date: '2016-05-02',
-          name: '王小虎',
-          province: '上海',
-          city: '普陀区',
-          address: '上海市普陀区金沙江路 1518 弄',
-          zip: 200333
+          value: '企业',
+          label: '企业'
         }, {
-          date: '2016-05-04',
-          name: '王小虎',
-          province: '上海',
-          city: '普陀区',
-          address: '上海市普陀区金沙江路 1518 弄',
-          zip: 200333
+          value: '散客',
+          label: '散客'
         }, {
-          date: '2016-05-01',
-          name: '王小虎',
-          province: '上海',
-          city: '普陀区',
-          address: '上海市普陀区金沙江路 1518 弄',
-          zip: 200333
+          value: '部门',
+          label: '部门'
         }]
       }
     },
+
     methods: {
-      handleNodeClick(data) {
-        console.log(data);
+      nodeClick(data, node) {
+        console.info(data)
+        console.info(node)
+        this.fatherNode = data.type;
       },
       handleClose(done) {
         this.$confirm('确认关闭？')
@@ -227,7 +252,65 @@
             done();
           })
           .catch(_ => {});
-      }
+      },
+
+      setItem() {
+        let newChild = { id: id++, label: this.addItem, children: [] };
+
+        if (!this.thisLabel.children) {
+          this.$set(this.thisLabel, 'children', []);
+        }
+        this.thisLabel.children.push(newChild);
+        this.dialogVisible = false;
+        console.log(this.addItem);
+        let that = this;
+        setTimeout(function(){
+          that.organization = [{
+            id: 1,
+            label: '总平台',
+            children: [{
+              id: 4,
+              label: '子平台',
+              children: [{
+                id: 9,
+                label: '企业'
+              }, {
+                id: 10,
+                label: '部门'
+              }, {
+                id: 11,
+                label: '散客'
+              }]
+            },{ id: 2,
+              label: '企业',
+              children:[{
+                id: 5,
+                label: '部门'
+              }]
+            },{id: 3,
+              label: '散客'
+            }]
+          }];
+        }, 10000)
+
+      },
+
+      // append(data) {
+      //   this.thisLabel = data;
+      //   if (data.label == "部门") {
+      //     this.addItem = "部门"
+      //   } else if(data.label == "总平台"){
+      //     this.addItem = "";
+      //     this.dialogVisible = true;
+      //   }
+      // },
+      //
+      // remove(node, data) {
+      //   const parent = node.parent;
+      //   const children = parent.data.children || parent.data;
+      //   const index = children.findIndex(d => d.id === data.id);
+      //   children.splice(index, 1);
+      // },
     }
   }
 </script>
