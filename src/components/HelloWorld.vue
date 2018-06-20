@@ -1,30 +1,89 @@
 <template>
   <div class="hello">
     <h1>组织树结构</h1>
+    <!--对话框-->
+    <!--新增-->
     <el-dialog
-      title="请输入节点名称"
-      :visible.sync="dialogVisible"
+      :title="fatherNodeName"
+      :visible.sync="dialogVisibleAdd"
       width="30%"
       :before-close="handleClose">
-      <el-select v-model="fatherNode" placeholder="父节点">
-        <el-option
-          v-for="item in options"
-          :key="item.value"
-          :label="item.value"
-          :value="item.label">
-        </el-option>
-      </el-select>
-      <el-select v-model="addItem" placeholder="子节点">
-        <el-option
-          v-for="item in options"
-          :key="item.value"
-          :label="item.value"
-          :value="item.label">
-        </el-option>
-      </el-select>
+      <div style="margin-top: 15px;" v-if="fatherNodeType==='总平台'">
+        <el-select v-model="childNodeType" placeholder="子节点类型" size="medium">
+          <el-option
+            v-for="item in optionsTP"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+        <el-input placeholder="子节点名称" v-model="childNodeName" class="input-with-select">
+        </el-input>
+      </div>
+      <div style="margin-top: 15px;" v-if="fatherNodeType==='子平台'">
+        <el-select v-model="childNodeType" placeholder="子节点类型" size="medium">
+          <el-option
+            v-for="item in optionsCP"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+        <el-input placeholder="子节点名称" v-model="childNodeName" class="input-with-select">
+        </el-input >
+      </div>
+      <div style="margin-top: 15px;" v-if="fatherNodeType==='企业'||fatherNodeType==='部门'">
+        <el-select v-model="childNodeType" placeholder="子节点类型" size="medium">
+          <el-option
+            v-for="item in optionsCom"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+        <el-input placeholder="子节点名称" v-model="childNodeName" class="input-with-select">
+        </el-input>
+      </div>
+
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="setItem">确 定</el-button>
+        <el-button type="primary">确 定</el-button>
+      </span>
+    </el-dialog>
+
+    <!--修改-->
+    <el-dialog
+      title="修改名称"
+      :visible.sync="dialogVisibleChange"
+      width="30%"
+      :before-close="handleClose">
+
+      <div style="margin-top: 15px;" >
+
+        <el-input placeholder="子节点名称" v-model="fatherNodeName" class="input-with-select">
+        </el-input>
+      </div>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary">确 定</el-button>
+      </span>
+    </el-dialog>
+
+    <!--删除-->
+    <el-dialog
+      title="删除"
+      :visible.sync="dialogVisibleDelete"
+      width="30%"
+      :before-close="handleClose">
+
+      <div style="margin-top: 15px;" >
+        <div>确定要删除{{fatherNodeName}}吗？</div>
+      </div>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary">确 定</el-button>
       </span>
     </el-dialog>
 
@@ -32,16 +91,16 @@
       <el-col :span="5">
         <el-container>
           <el-header style="border-right: 1px solid whitesmoke">
-            <el-row>
-              <el-button type="info" plain size="mini" @click="dialogVisible = true">新增</el-button>
-              <el-button  v-if="fatherNode" type="warning" plain size="mini" @click="dialogVisible = true">修改</el-button>
-              <el-button  v-if="fatherNode" type="danger" plain size="mini" @click="dialogVisible = true">删除</el-button>
+            <el-row v-if="fatherNodeType">
+              <el-button type="info" plain size="mini" @click="dialogVisibleAdd = true">新增</el-button>
+              <el-button type="warning" plain size="mini" @click="dialogVisibleChange = true">修改</el-button>
+              <el-button type="danger" plain size="mini" @click="dialogVisibleDelete = true">删除</el-button>
             </el-row>
           </el-header>
           <el-main>
             <div class="grid-content bg-purple">
               <el-tree
-                :data="organization"
+                :data="treeList"
                 node-key="id"
                 default-expand-all
                 @node-click="nodeClick"
@@ -184,12 +243,55 @@
     name: 'HelloWorld',
     data() {
       return {
-        dialogVisible: false,
-        thisLabel: null,
-        showId: '',
-        fatherNode: '',
-        childNode: '',
-        organization: [{
+        dialogVisibleAdd: false,
+        dialogVisibleChange: false,
+        dialogVisibleDelete: false,
+        fatherNodeType: '',
+        fatherNodeName: '',
+        childNodeType: '',
+        childNodeName: '',
+        treeList:[] ,
+        addItem: '',
+        optionsTP: [{
+          value: '子平台',
+          label: '子平台'
+        }, {
+          value: '企业',
+          label: '企业'
+        }],
+        optionsCP: [{
+          value: '部门',
+          label: '部门'
+        }, {
+          value: '企业',
+          label: '企业'
+        }],
+        optionsCom: [{
+          value: '部门',
+          label: '部门'
+        }],
+      }
+    },
+
+    methods: {
+      nodeClick(data, node) {
+        console.info(data)
+        console.info(node)
+        this.fatherNodeType = data.type;
+        this.fatherNodeName = data.name;
+      },
+
+      handleClose(done) {
+        this.$confirm('确认关闭？')
+          .then(_ => {
+            done();
+          })
+          .catch(_ => {});
+      },
+
+      //模拟从接口获取数据
+      getTreeList() {
+        this.treeList = [{
           id: 1,
           name: '面对面',
           type: "总平台",
@@ -222,78 +324,51 @@
             name: '散客',
             type: "散客"
           }]
-        }],
-        addItem: '',
-        options: [{
-          value: '子平台',
-          label: '子平台'
-        }, {
-          value: '企业',
-          label: '企业'
-        }, {
-          value: '散客',
-          label: '散客'
-        }, {
-          value: '部门',
-          label: '部门'
         }]
       }
-    },
 
-    methods: {
-      nodeClick(data, node) {
-        console.info(data)
-        console.info(node)
-        this.fatherNode = data.type;
-      },
-      handleClose(done) {
-        this.$confirm('确认关闭？')
-          .then(_ => {
-            done();
-          })
-          .catch(_ => {});
-      },
 
-      setItem() {
-        let newChild = { id: id++, label: this.addItem, children: [] };
 
-        if (!this.thisLabel.children) {
-          this.$set(this.thisLabel, 'children', []);
-        }
-        this.thisLabel.children.push(newChild);
-        this.dialogVisible = false;
-        console.log(this.addItem);
-        let that = this;
-        setTimeout(function(){
-          that.organization = [{
-            id: 1,
-            label: '总平台',
-            children: [{
-              id: 4,
-              label: '子平台',
-              children: [{
-                id: 9,
-                label: '企业'
-              }, {
-                id: 10,
-                label: '部门'
-              }, {
-                id: 11,
-                label: '散客'
-              }]
-            },{ id: 2,
-              label: '企业',
-              children:[{
-                id: 5,
-                label: '部门'
-              }]
-            },{id: 3,
-              label: '散客'
-            }]
-          }];
-        }, 10000)
-
-      },
+      // setItem() {
+      //   let newChild = { id: id++, label: this.addItem, children: [] };
+      //
+      //   if (!this.thisLabel.children) {
+      //     this.$set(this.thisLabel, 'children', []);
+      //   }
+      //   this.thisLabel.children.push(newChild);
+      //   this.dialogVisible = false;
+      //   console.log(this.addItem);
+      //   let that = this;
+      //   setTimeout(function(){
+      //     that.organization = [{
+      //       id: 1,
+      //       label: '总平台',
+      //       children: [{
+      //         id: 4,
+      //         label: '子平台',
+      //         children: [{
+      //           id: 9,
+      //           label: '企业'
+      //         }, {
+      //           id: 10,
+      //           label: '部门'
+      //         }, {
+      //           id: 11,
+      //           label: '散客'
+      //         }]
+      //       },{ id: 2,
+      //         label: '企业',
+      //         children:[{
+      //           id: 5,
+      //           label: '部门'
+      //         }]
+      //       },{id: 3,
+      //         label: '散客'
+      //       }]
+      //     }];
+      //   }, 10000)
+      //
+      // },
 
       // append(data) {
       //   this.thisLabel = data;
@@ -311,6 +386,9 @@
       //   const index = children.findIndex(d => d.id === data.id);
       //   children.splice(index, 1);
       // },
+    },
+    created() {
+      this.getTreeList()
     }
   }
 </script>
