@@ -95,7 +95,7 @@
       <!--右侧主体部分-->
       <el-col :span="19">
         <el-card class="box-card">
-          <div slot="header">
+          <div slot="header" style="height: 30px;">
             <el-row>
               <el-col :span="2" v-show="fatherNodeLabel">
                 <el-button type="info" plain @click="selectNode">保存</el-button>

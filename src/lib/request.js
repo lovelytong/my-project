@@ -20,6 +20,7 @@ export default {
     if(!status) {
       load.openLoading();
     }
+
     url = baseUrl + url + '?' + new Date().getTime();
 
     let requestConfig = {
@@ -85,10 +86,6 @@ export default {
       console.log(error)
       load.closeLoading();
       Message.error('请求异常');
-      // if (error.response.status === 401) {
-      //   router.push('/login');
-      //   return;
-      // }
       return {
         success: false,
         msg: '请求异常'
@@ -110,10 +107,6 @@ export default {
       fs.append('file', data);
       const response = await axios.post(url, fs, requestConfig);
       load.closeLoading();
-      // if (response.status === 401) {
-      //   router.push('/login');
-      //   return;
-      // }
       const responseJson = response.data;
       if (!responseJson.success) {
         Message.error(responseJson.msg);

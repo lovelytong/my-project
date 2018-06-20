@@ -1,14 +1,13 @@
 /*
- * @Author: Joker 
- * @Date: 2018-01-12 17:12:48 
+ * @Author: Joker
+ * @Date: 2018-01-12 17:12:48
  * @Last Modified by: mikey.zhaopeng
  * @Last Modified time: 2018-03-08 18:22:04
  */
 
 "use strict";
 import {
-  Loading,
-  Message
+  Loading
 } from 'element-ui';
 
 //请求loading
@@ -32,7 +31,7 @@ export let load = {
 
 
 
-/** 
+/**
  * 调用高德地图   根据关键字检索可选用的地址选项
  */
 export function getAddressDetailed(val, name, callBackFunc) {
@@ -78,7 +77,7 @@ export function getAddressDetailed(val, name, callBackFunc) {
 }
 
 
-/** 
+/**
  * 将选中的地址的经纬度等详细信息放入form中
  */
 export function confirmAddressInfo(val, data, city) {
@@ -95,7 +94,7 @@ export function confirmAddressInfo(val, data, city) {
 }
 
 
-/** 
+/**
  * 将地址转化为检索框所需的数据格式
  */
 export function formatAddress(data) {
@@ -238,7 +237,7 @@ export function recursion(val, key, data) {
 
 }
 
-/** 
+/**
  * 数组降维
  */
 export const reduction = arr => arr.reduce((begin, current) => {

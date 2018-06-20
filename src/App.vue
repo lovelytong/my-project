@@ -41,14 +41,7 @@
     color: #3791ff;
     text-align: left;
     margin-left: 30px;
-    font-weight: lighter;
+    font-weight: normal;
   }
-
-  .router-link-active{
-    text-decoration: none;
-  }
-
-  a {
-    text-decoraction: none;
-  }
+  
 </style>
